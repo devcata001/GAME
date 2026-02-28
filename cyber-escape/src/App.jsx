@@ -130,16 +130,16 @@ function LevelBanner({ data }) {
     return (
         <motion.div
             className="absolute inset-0 flex items-center justify-center z-35 pointer-events-none"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: [0, 1, 1, 0], scale: [0.8, 1, 1, 0.8] }}
-            transition={{ duration: 2.2, times: [0, 0.2, 0.7, 1] }}
+            initial={{ opacity: 0, scale: 0.88, y: -24 }}
+            animate={{ opacity: [0, 1, 1, 0], scale: [0.88, 1, 1, 0.9], y: [-24, 0, 14, 40] }}
+            transition={{ duration: 2.2, times: [0, 0.2, 0.72, 1] }}
         >
             <div className="text-center">
                 <div className="font-mono text-cyber-green text-glow-green text-4xl font-bold tracking-widest">
-                    LEVEL COMPLETE
+                    DESCENDING DEEPER
                 </div>
                 <div className="font-mono text-cyber-yellow text-lg mt-1">
-                    +{data.bonus} TIME BONUS &nbsp;·&nbsp; {String(data.score).padStart(6, '0')}
+                    ↓ LEVEL {Math.min(3, data.level + 1)} &nbsp;·&nbsp; +{data.bonus} BONUS &nbsp;·&nbsp; {String(data.score).padStart(6, '0')}
                 </div>
             </div>
         </motion.div>

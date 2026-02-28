@@ -41,24 +41,29 @@ export default class PreloadScene extends Phaser.Scene {
         g.fillStyle(0x04060b)
         g.fillRect(0, 0, 800, 600)
 
-        g.fillStyle(0x4b9a35)
-        g.fillRect(0, 0, 800, 18)
-        g.fillStyle(0x2f6d23)
+        g.fillStyle(0x78ff4a)
+        g.fillRect(0, 0, 800, 20)
+        g.fillStyle(0x4fc62e)
         for (let x = 0; x < 800; x += 16) {
-            g.fillTriangle(x, 18, x + 8, 8, x + 16, 18)
+            g.fillTriangle(x, 20, x + 8, 6, x + 16, 20)
         }
-        g.fillStyle(0x3a2616)
-        g.fillRect(0, 18, 800, 44)
+        g.lineStyle(2, 0xb8ff7f, 0.75)
+        g.beginPath(); g.moveTo(0, 20); g.lineTo(800, 20); g.strokePath()
+        g.fillStyle(0x4b311b)
+        g.fillRect(0, 20, 800, 46)
 
         g.fillStyle(0x070a10)
         g.fillRect(140, 0, 80, 64)
         g.lineStyle(1, 0x2dd46f, 0.3)
         g.strokeRect(140, 0, 80, 64)
 
-        g.fillStyle(0x0a1119, 0.9)
+        g.fillStyle(0x0a1119, 0.94)
         for (let i = 0; i < 8; i++) {
             g.fillEllipse(100 + i * 90, 160 + ((i % 2) * 70), 220, 130)
         }
+
+        g.fillStyle(0x020306, 0.55)
+        g.fillRect(0, 120, 800, 480)
 
         g.lineStyle(1, 0x1b3e57, 0.35)
         for (let y = 90; y <= 600; y += 36) {
@@ -69,7 +74,7 @@ export default class PreloadScene extends Phaser.Scene {
             g.beginPath(); g.moveTo(x, 78); g.lineTo(x, 600); g.strokePath()
         }
 
-        g.fillStyle(0x33d0ff, 0.22)
+        g.fillStyle(0x33d0ff, 0.24)
         for (let x = 24; x <= 780; x += 80) {
             for (let y = 110; y <= 570; y += 78) g.fillCircle(x, y, 1.5)
         }

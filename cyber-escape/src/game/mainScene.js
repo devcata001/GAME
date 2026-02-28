@@ -140,8 +140,9 @@ export default class MainScene extends Phaser.Scene {
 
         this.add.image(400, 300, 'background').setDepth(0)
         this.add.rectangle(400, 300, 800, 600, cfg.bgTint, 0.25).setDepth(1)
-        this.add.rectangle(400, 22, 800, 18, 0x4b9a35, 0.35).setDepth(2)
-        this.add.rectangle(400, 42, 800, 14, 0x3a2616, 0.28).setDepth(2)
+        this.add.rectangle(400, 22, 800, 20, 0x78ff4a, 0.45).setDepth(2)
+        this.add.rectangle(400, 40, 800, 16, 0x4b311b, 0.35).setDepth(2)
+        this.add.rectangle(400, 52, 800, 4, 0xb8ff7f, 0.45).setDepth(2)
 
         this.platforms = this.physics.add.staticGroup()
         this.coins = this.physics.add.staticGroup()
@@ -368,7 +369,19 @@ export default class MainScene extends Phaser.Scene {
         window.dispatchEvent(new CustomEvent('game:clear', {
             detail: { level: this.lvlIndex + 1, score: this.score, bonus }
         }))
-        this.time.delayedCall(1200, () => {
+
+        player.body.enable = false
+        this.tweens.add({
+            targets: player,
+            y: player.y + 180,
+            alpha: 0.18,
+            duration: 820,
+            ease: 'Quad.in',
+        })
+        this.cameras.main.shake(420, 0.01)
+        this.cameras.main.fadeOut(880, 4, 7, 14)
+
+        this.time.delayedCall(980, () => {
             const next = this.lvlIndex + 2
             if (next > levels.length) this.endGame(true)
             else this.scene.restart({ level: next, score: this.score, lives: this.lives })
