@@ -29,7 +29,6 @@ export default class UIScene extends Phaser.Scene {
 
         this.add.text(8, 8, 'SCORE', sm).setDepth(21)
         this.scoreTxt = this.add.text(8, 20, '000000', { ...base, color: '#ffe600', fontSize: '15px' }).setDepth(21)
-
         this.nameTxt = this.add.text(W / 2, 12, '', sm).setOrigin(0.5, 0).setDepth(21)
         this.livesTxt = this.add.text(W - 8, 8, '', sm).setOrigin(1, 0).setDepth(21)
         this.coinsTxt = this.add.text(W - 8, 22, '', base).setOrigin(1, 0).setDepth(21)
