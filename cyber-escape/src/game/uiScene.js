@@ -23,20 +23,22 @@ export default class UIScene extends Phaser.Scene {
         const W = this.scale.width
         const base = { fontFamily: '"Share Tech Mono", monospace', fontSize: '13px', color: '#00fff7' }
         const sm = { ...base, fontSize: '11px', color: '#00aaff' }
+        const timerWidth = 180
 
         this.add.rectangle(W / 2, 20, W, 40, 0x000000, 0.72).setDepth(20)
         this.add.rectangle(W / 2, 40, W, 1, 0x00fff7, 0.4).setDepth(20)
 
-        this.add.text(8, 8, 'SCORE', sm).setDepth(21)
-        this.scoreTxt = this.add.text(8, 20, '000000', { ...base, color: '#ffe600', fontSize: '15px' }).setDepth(21)
-        this.nameTxt = this.add.text(W / 2, 12, '', sm).setOrigin(0.5, 0).setDepth(21)
-        this.livesTxt = this.add.text(W - 8, 8, '', sm).setOrigin(1, 0).setDepth(21)
-        this.coinsTxt = this.add.text(W - 8, 22, '', base).setOrigin(1, 0).setDepth(21)
+        this.add.text(8, 8, 'TIME', sm).setDepth(21)
+        this.timerTxt = this.add.text(8, 20, '60s', { ...base, fontSize: '15px', color: '#aaffff' }).setDepth(22)
+        this.add.rectangle(8, 36, timerWidth, 6, 0x002233).setOrigin(0, 0.5).setDepth(21)
+        this.timerBar = this.add.rectangle(8, 36, timerWidth, 6, 0x00fff7).setOrigin(0, 0.5).setDepth(22)
 
-        // timer bar
-        this.add.rectangle(W / 2, 37, W - 120, 6, 0x002233).setDepth(21)
-        this.timerBar = this.add.rectangle(8, 34, W - 120, 6, 0x00fff7).setOrigin(0, 0.5).setDepth(22)
-        this.timerTxt = this.add.text(W / 2, 29, '60', { ...base, fontSize: '11px', color: '#aaffff' }).setOrigin(0.5, 0).setDepth(22)
+        this.add.text(W - 8, 8, 'SCORE', sm).setOrigin(1, 0).setDepth(21)
+        this.scoreTxt = this.add.text(W - 8, 20, '000000', { ...base, color: '#ffe600', fontSize: '15px' }).setOrigin(1, 0).setDepth(21)
+        this.coinsTxt = this.add.text(W - 8, 36, '', base).setOrigin(1, 0).setDepth(21)
+
+        this.nameTxt = this.add.text(W / 2, 12, '', sm).setOrigin(0.5, 0).setDepth(21)
+        this.livesTxt = this.add.text(W / 2, 28, '', sm).setOrigin(0.5, 0).setDepth(21)
     }
 
     draw() {
@@ -49,7 +51,7 @@ export default class UIScene extends Phaser.Scene {
         this.nameTxt.setText(d.levelName)
 
         const pct = d.timeLeft / 60
-        this.timerBar.width = Math.max(0, (W - 120) * pct)
+        this.timerBar.width = Math.max(0, 180 * pct)
         this.timerTxt.setText(`${d.timeLeft}s`)
 
         if (d.timeLeft <= 10) {

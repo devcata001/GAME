@@ -36,21 +36,44 @@ export default class PreloadScene extends Phaser.Scene {
     _makeTextures() {
         const g = this.make.graphics({ x: 0, y: 0, add: false })
 
-        // background grid
+        // background
         g.clear()
-        g.fillStyle(0x0a0a0f)
+        g.fillStyle(0x04060b)
         g.fillRect(0, 0, 800, 600)
-        g.lineStyle(1, 0x00aaff, 0.12)
-        for (let x = 0; x <= 800; x += 40) {
-            g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 600); g.strokePath()
+
+        g.fillStyle(0x4b9a35)
+        g.fillRect(0, 0, 800, 18)
+        g.fillStyle(0x2f6d23)
+        for (let x = 0; x < 800; x += 16) {
+            g.fillTriangle(x, 18, x + 8, 8, x + 16, 18)
         }
-        for (let y = 0; y <= 600; y += 40) {
+        g.fillStyle(0x3a2616)
+        g.fillRect(0, 18, 800, 44)
+
+        g.fillStyle(0x070a10)
+        g.fillRect(140, 0, 80, 64)
+        g.lineStyle(1, 0x2dd46f, 0.3)
+        g.strokeRect(140, 0, 80, 64)
+
+        g.fillStyle(0x0a1119, 0.9)
+        for (let i = 0; i < 8; i++) {
+            g.fillEllipse(100 + i * 90, 160 + ((i % 2) * 70), 220, 130)
+        }
+
+        g.lineStyle(1, 0x1b3e57, 0.35)
+        for (let y = 90; y <= 600; y += 36) {
             g.beginPath(); g.moveTo(0, y); g.lineTo(800, y); g.strokePath()
         }
-        g.fillStyle(0x00aaff, 0.25)
-        for (let x = 0; x <= 800; x += 40) {
-            for (let y = 0; y <= 600; y += 40) g.fillCircle(x, y, 1.5)
+        g.lineStyle(1, 0x2a6e8f, 0.22)
+        for (let x = 0; x <= 800; x += 56) {
+            g.beginPath(); g.moveTo(x, 78); g.lineTo(x, 600); g.strokePath()
         }
+
+        g.fillStyle(0x33d0ff, 0.22)
+        for (let x = 24; x <= 780; x += 80) {
+            for (let y = 110; y <= 570; y += 78) g.fillCircle(x, y, 1.5)
+        }
+
         g.generateTexture('background', 800, 600)
 
         // platform tile

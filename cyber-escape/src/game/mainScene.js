@@ -11,7 +11,8 @@ const levels = [
         id: 'Level 1 – Entry Node',
         bgTint: 0x001122,
         platforms: [
-            { x: 0, y: 75, sx: 4.0 },           // surface — player enters here
+            { x: 0, y: 75, sx: 0.7 },
+            { x: 220, y: 75, sx: 2.9 },
             { x: 490, y: 200, sx: 1.0 },
             { x: 80, y: 295, sx: 1.2 },
             { x: 460, y: 380, sx: 0.9 },
@@ -35,7 +36,8 @@ const levels = [
         id: 'Level 2 – Firewall Breach',
         bgTint: 0x001a00,
         platforms: [
-            { x: 0, y: 75, sx: 4.0 },
+            { x: 0, y: 75, sx: 0.7 },
+            { x: 220, y: 75, sx: 2.9 },
             { x: 530, y: 165, sx: 0.8 },
             { x: 200, y: 230, sx: 0.9 },
             { x: 550, y: 300, sx: 0.8 },
@@ -64,7 +66,8 @@ const levels = [
         id: 'Level 3 – Core Breach',
         bgTint: 0x1a0010,
         platforms: [
-            { x: 0, y: 75, sx: 4.0 },
+            { x: 0, y: 75, sx: 0.7 },
+            { x: 220, y: 75, sx: 2.9 },
             { x: 540, y: 155, sx: 0.7 },
             { x: 200, y: 215, sx: 0.8 },
             { x: 520, y: 280, sx: 0.7 },
@@ -124,6 +127,7 @@ export default class MainScene extends Phaser.Scene {
         this.finished = false
         this.restarting = false
         this.doorOpen = false
+        this.entryLocked = false
         this.audio = null
     }
 
@@ -136,6 +140,8 @@ export default class MainScene extends Phaser.Scene {
 
         this.add.image(400, 300, 'background').setDepth(0)
         this.add.rectangle(400, 300, 800, 600, cfg.bgTint, 0.25).setDepth(1)
+        this.add.rectangle(400, 22, 800, 18, 0x4b9a35, 0.35).setDepth(2)
+        this.add.rectangle(400, 42, 800, 14, 0x3a2616, 0.28).setDepth(2)
 
         this.platforms = this.physics.add.staticGroup()
         this.coins = this.physics.add.staticGroup()
@@ -156,6 +162,11 @@ export default class MainScene extends Phaser.Scene {
         this.player.setCollideWorldBounds(true)
         this.player.body.setGravityY(GRAVITY)
         this.player.body.setSize(14, 34)
+
+        this.entrySeal = this.add.rectangle(180, 58, 80, 12, 0x2dd46f, 0).setDepth(3)
+        this.physics.add.existing(this.entrySeal, true)
+        this.entrySeal.body.enable = false
+        this.physics.add.collider(this.player, this.entrySeal)
 
         // door starts locked
         this.door = this.doorGroup.create(cfg.door.x, cfg.door.y, 'door_closed').setDepth(4)
@@ -207,6 +218,18 @@ export default class MainScene extends Phaser.Scene {
             blendMode: 'ADD',
             emitting: false,
         }).setDepth(9)
+
+        this.ambientFX = this.add.particles(0, 0, 'particle', {
+            x: { min: 0, max: 800 },
+            y: { min: 70, max: 600 },
+            speedX: { min: -8, max: 8 },
+            speedY: { min: -4, max: 4 },
+            alpha: { start: 0.18, end: 0 },
+            scale: { start: 0.45, end: 0.1 },
+            lifespan: { min: 1800, max: 3200 },
+            frequency: 140,
+            blendMode: 'ADD',
+        }).setDepth(2)
 
         this.deathFX = this.add.particles(0, 0, 'particle_red', {
             speed: { min: 100, max: 250 },
@@ -277,6 +300,11 @@ export default class MainScene extends Phaser.Scene {
         })
 
         if (this.player.y > 610) this.onDeath(this.player, null)
+
+        if (!this.entryLocked && this.player.y > 110) {
+            this.entryLocked = true
+            this.entrySeal.body.enable = true
+        }
 
         if (!this.doorOpen && this.coinsLeft === 0 && this.totalCoins > 0) {
             this.doorOpen = true
