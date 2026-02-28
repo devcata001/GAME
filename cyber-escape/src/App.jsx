@@ -190,9 +190,18 @@ export default function App() {
         return () => phaserGameRef.current?.destroy(true)
     }, [])
 
+    useEffect(() => {
+        const refreshScale = () => {
+            phaserGameRef.current?.scale?.refresh()
+        }
+
+        window.addEventListener('resize', refreshScale)
+        return () => window.removeEventListener('resize', refreshScale)
+    }, [])
+
     return (
         <div className="relative w-full h-full flex items-center justify-center bg-cyber-black overflow-hidden">
-            <div ref={mountNodeRef} style={{ width: W, height: H }} id="game-root" />
+            <div ref={mountNodeRef} className="w-full h-full" id="game-root" />
 
             <AnimatePresence>
                 {screen === 'title' && <TitleScreen key="t" onPlay={startGame} />}
