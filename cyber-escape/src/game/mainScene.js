@@ -117,7 +117,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.lvlIndex = (data.level || 1) - 1
+        this.levelIndex = (data.level || 1) - 1
         this.score = data.score || 0
         this.lives = data.lives ?? 3
         this.timeLeft = TIME_LIMIT
@@ -132,14 +132,14 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
-        const cfg = levels[this.lvlIndex]
+        const levelData = levels[this.levelIndex]
 
         try {
             this.audio = new (window.AudioContext || window.webkitAudioContext)()
         } catch (_) { }
 
         this.add.image(400, 300, 'background').setDepth(0)
-        this.add.rectangle(400, 300, 800, 600, cfg.bgTint, 0.25).setDepth(1)
+        this.add.rectangle(400, 300, 800, 600, levelData.bgTint, 0.25).setDepth(1)
         this.add.rectangle(400, 22, 800, 20, 0x78ff4a, 0.45).setDepth(2)
         this.add.rectangle(400, 40, 800, 16, 0x4b311b, 0.35).setDepth(2)
         this.add.rectangle(400, 52, 800, 4, 0xb8ff7f, 0.45).setDepth(2)
@@ -149,16 +149,16 @@ export default class MainScene extends Phaser.Scene {
         this.enemies = this.physics.add.group()
         this.doorGroup = this.physics.add.staticGroup()
 
-        cfg.platforms.forEach(p => {
-            const sx = p.sx ?? 1
-            const tile = this.platforms.create(p.x + (200 * sx) / 2, p.y, 'platform')
-            tile.setScale(sx, 1).refreshBody().setDepth(3)
-            if (p.ground) tile.setTint(0x004455)
+        levelData.platforms.forEach(platformData => {
+            const scaleX = platformData.sx ?? 1
+            const platformTile = this.platforms.create(platformData.x + (200 * scaleX) / 2, platformData.y, 'platform')
+            platformTile.setScale(scaleX, 1).refreshBody().setDepth(3)
+            if (platformData.ground) platformTile.setTint(0x004455)
         })
 
         this.add.image(400, 590, 'danger_ground').setDepth(2)
 
-        this.player = this.physics.add.sprite(cfg.spawn.x, cfg.spawn.y, 'player').setDepth(5)
+        this.player = this.physics.add.sprite(levelData.spawn.x, levelData.spawn.y, 'player').setDepth(5)
         this.player.setBounce(BOUNCE)
         this.player.setCollideWorldBounds(true)
         this.player.body.setGravityY(GRAVITY)
@@ -170,7 +170,7 @@ export default class MainScene extends Phaser.Scene {
         this.physics.add.collider(this.player, this.entrySeal)
 
         // door starts locked
-        this.door = this.doorGroup.create(cfg.door.x, cfg.door.y, 'door_closed').setDepth(4)
+        this.door = this.doorGroup.create(levelData.door.x, levelData.door.y, 'door_closed').setDepth(4)
         this.door.body.setSize(34, 54)
         this.lockedTween = this.tweens.add({
             targets: this.door,
@@ -181,10 +181,10 @@ export default class MainScene extends Phaser.Scene {
             ease: 'Sine.easeInOut',
         })
 
-        cfg.coins.forEach(c => {
-            const s = this.coins.create(c.x, c.y, 'coin').setDepth(4).setScale(1.1)
+        levelData.coins.forEach(coinData => {
+            const coinSprite = this.coins.create(coinData.x, coinData.y, 'coin').setDepth(4).setScale(1.1)
             this.tweens.add({
-                targets: s,
+                targets: coinSprite,
                 alpha: 0.5,
                 duration: 700 + Math.random() * 300,
                 yoyo: true,
@@ -192,19 +192,19 @@ export default class MainScene extends Phaser.Scene {
                 ease: 'Sine.easeInOut',
             })
         })
-        this.totalCoins = cfg.coins.length
+        this.totalCoins = levelData.coins.length
         this.coinsLeft = this.totalCoins
 
-        cfg.enemies.forEach(e => {
-            const s = this.enemies.create(e.x, e.y, 'firewall').setDepth(4)
-            s.setImmovable(true)
-            s.body.setAllowGravity(false)
-            s.setData('dir', e.dir)
-            s.setData('spd', e.spd)
-            s.setData('range', e.range)
-            s.setData('origin', { x: e.x, y: e.y })
-            s.setData('phase', Math.random() * Math.PI * 2)
-            this.tweens.add({ targets: s, alpha: 0.5, duration: 400, yoyo: true, repeat: -1 })
+        levelData.enemies.forEach(enemyData => {
+            const enemySprite = this.enemies.create(enemyData.x, enemyData.y, 'firewall').setDepth(4)
+            enemySprite.setImmovable(true)
+            enemySprite.body.setAllowGravity(false)
+            enemySprite.setData('dir', enemyData.dir)
+            enemySprite.setData('spd', enemyData.spd)
+            enemySprite.setData('range', enemyData.range)
+            enemySprite.setData('origin', { x: enemyData.x, y: enemyData.y })
+            enemySprite.setData('phase', Math.random() * Math.PI * 2)
+            this.tweens.add({ targets: enemySprite, alpha: 0.5, duration: 400, yoyo: true, repeat: -1 })
         })
 
         this.physics.add.collider(this.player, this.platforms)
@@ -283,20 +283,20 @@ export default class MainScene extends Phaser.Scene {
             beep(this.audio, 440, 'square', 0.12, 0.15)
         }
 
-        const t = time / 1000
-        this.enemies.getChildren().forEach(e => {
-            const dir = e.getData('dir')
-            const spd = e.getData('spd')
-            const range = e.getData('range')
-            const origin = e.getData('origin')
-            const phase = e.getData('phase')
-            const offset = Math.sin(t * (spd / 60) + phase) * range
-            if (dir === 'h') {
-                e.x = origin.x + offset
-                e.body.reset(e.x, e.y)
+        const elapsedSeconds = time / 1000
+        this.enemies.getChildren().forEach(enemy => {
+            const moveDirection = enemy.getData('dir')
+            const speed = enemy.getData('spd')
+            const moveRange = enemy.getData('range')
+            const startPoint = enemy.getData('origin')
+            const randomPhase = enemy.getData('phase')
+            const moveOffset = Math.sin(elapsedSeconds * (speed / 60) + randomPhase) * moveRange
+            if (moveDirection === 'h') {
+                enemy.x = startPoint.x + moveOffset
+                enemy.body.reset(enemy.x, enemy.y)
             } else {
-                e.y = origin.y + offset
-                e.body.reset(e.x, e.y)
+                enemy.y = startPoint.y + moveOffset
+                enemy.body.reset(enemy.x, enemy.y)
             }
         })
 
@@ -360,14 +360,14 @@ export default class MainScene extends Phaser.Scene {
     onDoor(player, _door) {
         if (this.coinsLeft > 0 || this.finished) return
         this.finished = true
-        const bonus = this.timeLeft * TIME_BONUS
-        this.score += bonus
+        const timeBonus = this.timeLeft * TIME_BONUS
+        this.score += timeBonus
         beep(this.audio, 1320, 'sine', 0.8, 0.4)
         beep(this.audio, 1760, 'sine', 0.4, 0.15)
         this.cameras.main.flash(400, 138, 0, 255)
         this.updateHUD()
         window.dispatchEvent(new CustomEvent('game:clear', {
-            detail: { level: this.lvlIndex + 1, score: this.score, bonus }
+            detail: { level: this.levelIndex + 1, score: this.score, bonus: timeBonus }
         }))
 
         player.body.enable = false
@@ -382,7 +382,7 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.fadeOut(880, 4, 7, 14)
 
         this.time.delayedCall(980, () => {
-            const next = this.lvlIndex + 2
+            const next = this.levelIndex + 2
             if (next > levels.length) this.endGame(true)
             else this.scene.restart({ level: next, score: this.score, lives: this.lives })
         })
@@ -397,13 +397,13 @@ export default class MainScene extends Phaser.Scene {
 
     resetLevel() {
         this.restarting = true
-        this.scene.restart({ level: this.lvlIndex + 1, score: this.score, lives: this.lives })
+        this.scene.restart({ level: this.levelIndex + 1, score: this.score, lives: this.lives })
     }
 
     endGame(win = false) {
         this.clock?.remove()
         window.dispatchEvent(new CustomEvent('game:end', {
-            detail: { score: this.score, win, level: this.lvlIndex + 1 }
+            detail: { score: this.score, win, level: this.levelIndex + 1 }
         }))
         this.scene.stop('UIScene')
         this.scene.stop('MainScene')
@@ -412,8 +412,8 @@ export default class MainScene extends Phaser.Scene {
     updateHUD() {
         window.dispatchEvent(new CustomEvent('game:update', {
             detail: {
-                level: this.lvlIndex + 1,
-                levelName: levels[this.lvlIndex].id,
+                level: this.levelIndex + 1,
+                levelName: levels[this.levelIndex].id,
                 score: this.score,
                 lives: this.lives,
                 timeLeft: this.timeLeft,

@@ -9,10 +9,10 @@ import './index.css'
 const W = 800
 const H = 600
 
-function buildConfig(parent) {
+function createGameConfig(parentElement) {
     return {
         type: Phaser.AUTO,
-        parent,
+        parent: parentElement,
         width: W,
         height: H,
         backgroundColor: '#0a0a0f',
@@ -28,6 +28,10 @@ function buildConfig(parent) {
         audio: { disableWebAudio: false },
         render: { antialias: true, roundPixels: false },
     }
+}
+
+function formatScore(value) {
+    return String(value).padStart(6, '0')
 }
 
 function TitleScreen({ onPlay }) {
@@ -109,7 +113,7 @@ function GameOverScreen({ win, score, level, onRetry }) {
                 </p>
                 <div className="bg-black/40 rounded mb-6 py-4">
                     <div className="font-mono text-cyber-yellow text-4xl font-bold text-glow-green">
-                        {String(score).padStart(6, '0')}
+                        {formatScore(score)}
                     </div>
                     <div className="font-mono text-cyber-blue text-xs mt-1">FINAL SCORE</div>
                 </div>
@@ -139,7 +143,7 @@ function LevelBanner({ data }) {
                     DESCENDING DEEPER
                 </div>
                 <div className="font-mono text-cyber-yellow text-lg mt-1">
-                    ↓ LEVEL {Math.min(3, data.level + 1)} &nbsp;·&nbsp; +{data.bonus} BONUS &nbsp;·&nbsp; {String(data.score).padStart(6, '0')}
+                    ↓ LEVEL {Math.min(3, data.level + 1)} &nbsp;·&nbsp; +{data.bonus} BONUS &nbsp;·&nbsp; {formatScore(data.score)}
                 </div>
             </div>
         </motion.div>
@@ -147,52 +151,64 @@ function LevelBanner({ data }) {
 }
 
 export default function App() {
-    const mountRef = useRef(null)
-    const gameRef = useRef(null)
-    const [view, setView] = useState('title')
-    const [result, setResult] = useState({ score: 0, level: 1, win: false })
-    const [banner, setBanner] = useState(null)
+    const mountNodeRef = useRef(null)
+    const phaserGameRef = useRef(null)
 
-    const launch = useCallback(() => {
-        setView('game')
+    const [screen, setScreen] = useState('title')
+    const [gameResult, setGameResult] = useState({ score: 0, level: 1, win: false })
+    const [levelBannerData, setLevelBannerData] = useState(null)
+
+    const startGame = useCallback(() => {
+        setScreen('game')
         setTimeout(() => {
-            gameRef.current?.destroy(true)
-            gameRef.current = new Phaser.Game(buildConfig(mountRef.current))
+            phaserGameRef.current?.destroy(true)
+            phaserGameRef.current = new Phaser.Game(createGameConfig(mountNodeRef.current))
         }, 80)
     }, [])
 
     useEffect(() => {
-        const onOver = e => { setResult(e.detail); setView('gameover') }
-        const onLevel = e => { setBanner(e.detail); setTimeout(() => setBanner(null), 2400) }
-        window.addEventListener('game:end', onOver)
-        window.addEventListener('game:clear', onLevel)
+        const handleGameEnd = event => {
+            setGameResult(event.detail)
+            setScreen('gameover')
+        }
+
+        const handleLevelClear = event => {
+            setLevelBannerData(event.detail)
+            setTimeout(() => setLevelBannerData(null), 2400)
+        }
+
+        window.addEventListener('game:end', handleGameEnd)
+        window.addEventListener('game:clear', handleLevelClear)
+
         return () => {
-            window.removeEventListener('game:end', onOver)
-            window.removeEventListener('game:clear', onLevel)
+            window.removeEventListener('game:end', handleGameEnd)
+            window.removeEventListener('game:clear', handleLevelClear)
         }
     }, [])
 
-    useEffect(() => () => gameRef.current?.destroy(true), [])
+    useEffect(() => {
+        return () => phaserGameRef.current?.destroy(true)
+    }, [])
 
     return (
         <div className="relative w-full h-full flex items-center justify-center bg-cyber-black overflow-hidden">
-            <div ref={mountRef} style={{ width: W, height: H }} id="game-root" />
+            <div ref={mountNodeRef} style={{ width: W, height: H }} id="game-root" />
 
             <AnimatePresence>
-                {view === 'title' && <TitleScreen key="t" onPlay={launch} />}
-                {view === 'gameover' && (
+                {screen === 'title' && <TitleScreen key="t" onPlay={startGame} />}
+                {screen === 'gameover' && (
                     <GameOverScreen
                         key="g"
-                        win={result.win}
-                        score={result.score}
-                        level={result.level}
-                        onRetry={launch}
+                        win={gameResult.win}
+                        score={gameResult.score}
+                        level={gameResult.level}
+                        onRetry={startGame}
                     />
                 )}
             </AnimatePresence>
 
             <AnimatePresence>
-                {banner && <LevelBanner key={banner.level} data={banner} />}
+                {levelBannerData && <LevelBanner key={levelBannerData.level} data={levelBannerData} />}
             </AnimatePresence>
         </div>
     )
